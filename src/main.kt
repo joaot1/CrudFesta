@@ -1,8 +1,13 @@
 val expressaoRegular = Regex("[0-5]")
-val validarNome = Regex("[A-Za-z]")
+val validarNome = Regex("^[a-zA-ZÀ-ÿ ]+$")
+val validarNumero = Regex("^[0-9]+$")
+val validarResposta = Regex("^[SN]+$")
+val validarBusca = Regex("^[a-zA-Z]+$", RegexOption.IGNORE_CASE)
+
 //Variavel Globar
-// Instância de uma lista vazia
+// Instância de uma lista mutável vazia
 var listaConvidados : MutableList<Convidado> = mutableListOf<Convidado>()
+val lista = mutableListOf("b", "a", "c", "e", "d")
 
 fun main(){
      menu()
@@ -18,7 +23,7 @@ fun main(){
          println("4 - EXCLUIR")
          println("5 - BUSCA")
          println("0 - SAIR")
-         val opcao = readln()
+         val opcao = readln()//Aqui precisar ser String. Por causa do REGEX
 
 
          if(expressaoRegular.matches(opcao)){
@@ -56,21 +61,25 @@ fun main(){
              println("\n\n\nOpcão Invalidada")
          }
 
-     } while (opcao != "0")
+     } while (opcao != "0")//Precisa ser String
  }
 
-// valide para que o usuario digite letras para escrever o nome
+
+// QUESTÃO 1 - Valida para que o usuario somente digite LETRAS para escrever o nome
  private fun cadastrar(){
      //Instancia da classe
      var convidado = Convidado()
-
+    //Inicio do Regex de validação de NOME
+do{
      print("Qual o seu nome? ")
-    // val nome = readln()
-     convidado.nome = readln()
-    if(!convidado.nome.contains(validarNome)){
-        println("Nome Invalido...")
-        return
+     val nome = readln()
+    if(validarNome.matches(nome)){
+        convidado.nome = nome
+        break
+    } else{
+        println("Nome Inválido! Use apenas Letras.")
     }
+}while (true)
 
      print("Qual vai ser o presente? ")
     // val presente = readln()
@@ -96,53 +105,75 @@ private fun listar() {
                         "Presente: ${convidado.presente} ; " +
                         " Restrição: ${convidado.alimentar} ; " +
                         "Vai ir a festa: ${convidado.presenca} ;\n"
-            )
-        }
-    }
-}
+            )//Fim do PRINT
+        }//Fim do For Each
+    }//Fim do IF
+    return  // retorno da função
+}//Fim da função listar
 
+//Questão 2 - Validar para que a variavel posição seja sempre numérica e a variavel resposta seja sempre "S" ou "N".
 private fun editar(): Boolean {
-    if (validar()) {
-        listar()
+    println("Digite a Posição a ser editada: ")
+    val posicaoNumeros = readln()
+    if(!validarNumero.matches(posicaoNumeros)){
+        println("Posição Inválida! Use apenas Numeros.")
+        return false
+    }
+    val posicao = posicaoNumeros.toInt()
+    if (posicao >= listaConvidados.size){
+      println("Posição inexistente na lista de convidados.")
+      return false
+    }
 
-        println("Digite a posição a ser editada:")
-        val posicao = readln().toInt()
-
-        println("O convidado vai? S/N")
-        val resposta = readln()
-        when (resposta) {
-            "S" -> listaConvidados[0].presenca = true
-
-            "N" -> listaConvidados[0].presenca = false
-        }
+    println("O convidado vai? S/N")
+    val resposta = readln()
+    if(!validarResposta.matches(resposta)){
+        println("Respota Inválida! Digite apenas S ou N.")
+        return false
+    }
+    when(resposta.uppercase()){
+        "S" -> listaConvidados[posicao].presenca = true
+        "N" -> listaConvidados[posicao].presenca = false
     }
     return true
 }
 
 
-
+//Questão 3 - Validar para que a variavel posição seja sempre numérica
 private fun excluir(): Boolean {
-    if (validar()) {
+    if(!listaConvidados.isEmpty()){
         listar()
-
-        println("Digite a posição a ser removida:")
-        val posicao = readln().toInt()
-
+        println("Qual Posição você deseja remover: ")
+        val posicaoStr = readln()
+        if(!validarNumero.matches(posicaoStr)){
+            println("Posição Inválida!")
+            return false
+        }
+        val posicao = posicaoStr.toInt()
+        if(posicao >= listaConvidados.size){
+            println("Essa posição não existe. ")
+            return false
+        }
         listaConvidados.removeAt(posicao)
-
-        println("Convidado excluido")
+        println("Convidado excluído!")
     }
     return true
 }
 
+//Questão 4 - validar para que a variavel busca seja sempre alfabética, ignora letras maiusculas e minusculas
 private fun busca() {
-    var i = 0
-    print("Digite o nome da pessoa que você busca: ")
+
+   print("Digite o nome da pessoa que você deseja buscar: ")
     val busca = readln()
+    if(!validarBusca.matches(busca)){
+        println("Busca Inválida! Use apenas Letras.")
+        return
+    }
+
+    var i = 0
     listaConvidados.forEach { convidado ->
-        //Busca uma String dentro de uma outra String
-        if (convidado.nome.contains(busca)) {
-            println("Posição: $i, Nome: ${convidado.nome}")
+        if(convidado.nome.contains(busca, ignoreCase = true)){
+            println("Posição: $i, Nome: ${convidado.nome} ;")
         }
         i++
     }
